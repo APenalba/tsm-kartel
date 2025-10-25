@@ -1,14 +1,6 @@
 {
   "name": "tsm-kartel-n-company",
-  "type": "module",
   "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "start": "node ./dist/server/entry.mjs",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
   "dependencies": {
     "@astrojs/react": "^4.4.0",
     "@tailwindcss/vite": "^4.1.15",
@@ -21,7 +13,15 @@
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.15"
   },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node ./dist/server/entry.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "type": "module",
   "devDependencies": {
-    "@astrojs/node": "^9.5.0"
+    "@astrojs/vercel": "^9.0.0"
   }
 }
