@@ -1,0 +1,86 @@
+---
+import { type Mod } from '../data/mods';
+
+interface Props {
+  title: string;
+  description: string;
+  mods: Mod[];
+}
+
+const { title, description, mods } = Astro.props;
+
+// Detectar si hay al menos un mod requerido en la lista
+const hasRequiredMods = mods.some(mod => mod.required);
+---
+
+<div class="card">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-white mb-2">{title}</h2>
+    <p class="text-gray-400 text-sm">{description}</p>
+  </div>
+
+  {hasRequiredMods && (
+    <div class="mb-6 rounded-xl p-4 border border-red-700/30" style="background: rgba(185,28,28,0.2)">
+      <div class="flex items-start space-x-3">
+        <svg class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <div class="text-sm text-red-300">
+          <p class="font-semibold mb-1">Mods Requeridos</p>
+          <p class="text-red-200/80">
+            Los mods marcados como <span class="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30 font-semibold">Requerido</span> son necesarios para conectarte al servidor.
+          </p>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="space-y-3">
+    {mods.map((mod) => (
+      <div class="rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors bg-gray-900/50">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center space-x-2 mb-1">
+              <h3 class="text-lg font-semibold text-white">{mod.name}</h3>
+              {mod.required && (
+                <span class="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                  Requerido
+                </span>
+              )}
+            </div>
+            <p class="text-sm text-gray-400 mb-2">{mod.description}</p>
+            <div class="flex flex-wrap items-center gap-4 text-xs">
+              <span class="text-gray-500">
+                Versión: <span class="text-gray-300 font-mono">{mod.version}</span>
+              </span>
+              {mod.dependencies && mod.dependencies.length > 0 && (
+                <span class="text-gray-500">
+                  Depende de: 
+                  {mod.dependencies.map((dep, index) => (
+                    <span class="text-gray-300 font-mono">
+                      {dep}{index < mod.dependencies!.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+                </span>
+              )}
+              {mod.link && (
+                <a 
+                  href={mod.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="link"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  <span>Descargar</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+

@@ -1,0 +1,282 @@
+---
+import type { ServerStatus as ServerStatusType } from '../lib/graphql';
+import { getServerStatus } from '../lib/graphql';
+
+// Server-side data fetching
+let status: ServerStatusType | null = null;
+let error: string | null = null;
+
+try {
+  status = await getServerStatus();
+} catch (err) {
+  error = 'No se pudo conectar con el servidor';
+  console.error(err);
+}
+---
+
+<script>
+  import type { ServerStatus as ServerStatusType } from '../lib/graphql';
+  // Client-side periodic refresh
+  document.addEventListener('DOMContentLoaded', () => {
+    const serverStatusContainer = document.getElementById('server-status-container');
+    
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch('/api/server-status');
+        const data = await response.json();
+        
+        if (!data || !serverStatusContainer) return;
+        
+        // Replace the entire container content with new data
+        serverStatusContainer.innerHTML = generateStatusHTML(data);
+      } catch (err) {
+        console.error('Error fetching server status:', err);
+        if (serverStatusContainer) {
+          serverStatusContainer.innerHTML = generateErrorHTML('No se pudo conectar con el servidor');
+        }
+      }
+    };
+    
+    // Generate HTML for server status
+    const generateStatusHTML = (status: ServerStatusType) => {
+      if (!status.online) {
+        return generateErrorHTML('El servidor está offline');
+      }
+      
+      return `
+        <div class="card shadow-2xl">
+          <!-- Status Header -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="w-4 h-4 rounded-full ${status.online ? 'bg-green-500 animate-pulse' : 'bg-red-500'}"></div>
+              <h2 class="text-2xl font-bold text-white">
+                ${status.online ? 'ONLINE' : 'OFFLINE'}
+              </h2>
+            </div>
+            ${status.latency ? `
+              <div class="text-right">
+                <div class="text-sm text-gray-400">Ping</div>
+                <div class="text-lg font-bold ${
+                  status.latency < 50 ? 'text-green-400' : 
+                  status.latency < 100 ? 'text-yellow-400' : 
+                  'text-red-400'
+                }">
+                  ${Math.round(status.latency)}ms
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Server Info Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Jugadores -->
+            <div class="panel">
+              <div class="text-sm text-gray-400 mb-1">Jugadores</div>
+              <div class="text-3xl font-bold text-white">
+                ${status.players?.online || 0}
+                <span class="text-gray-500 text-lg">/${status.players?.max || 0}</span>
+              </div>
+              <div class="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  class="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-500"
+                  style="width: ${((status.players?.online || 0) / (status.players?.max || 1)) * 100}%"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Versión -->
+            <div class="panel">
+              <div class="text-sm text-gray-400 mb-1">Versión</div>
+              <div class="text-xl font-bold text-white">
+                ${status.version?.name || 'N/A'}
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                Protocolo ${status.version?.protocol || 'N/A'}
+              </div>
+            </div>
+
+            <!-- Servidor -->
+            <div class="panel">
+              <div class="text-sm text-gray-400 mb-1">Dirección</div>
+              <div class="text-lg font-mono text-white">
+                ${status.host}
+              </div>
+              <div class="text-sm text-gray-500 mt-1">
+                Puerto: ${status.port}
+              </div>
+            </div>
+          </div>
+
+          <!-- MOTD -->
+          ${status.description ? `
+            <div class="panel-subtle">
+              <div class="text-sm text-gray-400 mb-2">Mensaje del servidor</div>
+              <div class="text-gray-200 font-minecraft">
+                ${status.description}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Players List -->
+          ${status.players?.players && status.players.players.length > 0 ? `
+            <div class="mt-4 panel-subtle">
+              <div class="text-sm text-gray-400 mb-3">Jugadores conectados</div>
+              <div class="flex flex-wrap gap-2">
+                ${status.players.players.map((player: { name: string; id?: string }) => `
+                  <div class="flex items-center space-x-2 bg-gray-800/50 px-3 py-2 rounded-md border border-gray-700">
+                    <img 
+                      src="https://mc-heads.net/avatar/${player.name}/32"
+                      alt="${player.name}"
+                      class="w-6 h-6 rounded"
+                      loading="lazy"
+                    />
+                    <span class="text-sm text-white font-medium">${player.name}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Last Update -->
+          <div class="mt-4 text-xs text-gray-500 text-right">
+            Última actualización: ${new Date(status.queriedAt).toLocaleString('es-ES')}
+          </div>
+        </div>
+      `;
+    };
+    
+    // Generate HTML for error state
+    const generateErrorHTML = (errorMsg: string) => {
+      return `
+        <div class="bg-red-900/30 backdrop-blur-sm rounded-lg p-6 border border-red-700">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+            <span class="text-red-300 font-semibold">OFFLINE</span>
+          </div>
+          <p class="text-gray-400 mt-2 text-sm">${errorMsg}</p>
+        </div>
+      `;
+    };
+    
+    // Update every 30 seconds
+    const interval = setInterval(fetchStatus, 30000);
+    
+    // Clean up interval on page navigation
+    document.addEventListener('astro:page-load', () => {
+      clearInterval(interval);
+    });
+  });
+</script>
+
+<div id="server-status-container">
+  {error || !status ? (
+    <div class="alert alert-error" role="status" aria-live="polite">
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+        <span class="text-red-300 font-semibold">OFFLINE</span>
+      </div>
+      <p class="text-gray-400 mt-2 text-sm">{error}</p>
+    </div>
+  ) : (
+    <div class="card shadow-2xl" role="status" aria-live="polite">
+      <!-- Status Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class={`w-4 h-4 rounded-full ${status.online ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+          <h2 class="text-2xl font-bold text-white">
+            {status.online ? 'ONLINE' : 'OFFLINE'}
+          </h2>
+        </div>
+        {status.latency && (
+          <div class="text-right">
+            <div class="text-sm text-gray-400">Ping</div>
+            <div class={`text-lg font-bold ${
+              status.latency < 50 ? 'text-green-400' : 
+              status.latency < 100 ? 'text-yellow-400' : 
+              'text-red-400'
+            }`}>
+              {Math.round(status.latency)}ms
+            </div>
+          </div>
+        )}
+      </div>
+
+      <!-- Server Info Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Jugadores -->
+        <div class="rounded-lg p-4 border border-gray-700 bg-gray-900/50">
+          <div class="text-sm text-gray-400 mb-1">Jugadores</div>
+          <div class="text-3xl font-bold text-white">
+            {status.players?.online || 0}
+            <span class="text-gray-500 text-lg">/{status.players?.max || 0}</span>
+          </div>
+          <div class="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-500"
+              style={`width: ${((status.players?.online || 0) / (status.players?.max || 1)) * 100}%`}
+            ></div>
+          </div>
+        </div>
+
+        <!-- Versión -->
+        <div class="rounded-lg p-4 border border-gray-700 bg-gray-900/50">
+          <div class="text-sm text-gray-400 mb-1">Versión</div>
+          <div class="text-xl font-bold text-white">
+            {status.version?.name || 'N/A'}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">
+            Protocolo {status.version?.protocol || 'N/A'}
+          </div>
+        </div>
+
+        <!-- Servidor -->
+        <div class="rounded-lg p-4 border border-gray-700 bg-gray-900/50">
+          <div class="text-sm text-gray-400 mb-1">Dirección</div>
+          <div class="text-lg font-mono text-white">
+            {status.host}
+          </div>
+          <div class="text-sm text-gray-500 mt-1">
+            Puerto: {status.port}
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTD -->
+      {status.description && (
+        <div class="rounded-lg p-4 border border-gray-700 bg-gray-900/30">
+          <div class="text-sm text-gray-400 mb-2">Mensaje del servidor</div>
+          <div class="text-gray-200 font-minecraft">
+            {status.description}
+          </div>
+        </div>
+      )}
+
+      <!-- Players List -->
+      {status.players?.players && status.players.players.length > 0 && (
+        <div class="mt-4 rounded-lg p-4 border border-gray-700 bg-gray-900/30">
+          <div class="text-sm text-gray-400 mb-3">Jugadores conectados</div>
+          <div class="flex flex-wrap gap-2">
+            {status.players.players.map((player, index) => (
+              <div 
+                class="flex items-center space-x-2 bg-gray-800/50 px-3 py-2 rounded-md border border-gray-700"
+              >
+                <img 
+                  src={`https://mc-heads.net/avatar/${player.name}/32`}
+                  alt={player.name}
+                  class="w-6 h-6 rounded"
+                  loading="lazy"
+                />
+                <span class="text-sm text-white font-medium">{player.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Last Update -->
+      <div class="mt-4 text-xs text-gray-500 text-right">
+        Última actualización: {new Date(status.queriedAt).toLocaleString('es-ES')}
+      </div>
+    </div>
+  )}
+</div>

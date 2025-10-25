@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ServerRules from '../components/ServerRules.astro';
+---
+
+<Layout 
+  title="Reglas - TSM Kartel & Comp."
+  description="Reglas del servidor TSM Kartel & Comp. - Lee y respeta estas normas"
+>
+  <!-- Header de la página -->
+  <div class="mb-12 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+      📜 Reglas del Servidor
+    </h1>
+    <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+      Para mantener una comunidad saludable y divertida, todos los jugadores deben seguir estas reglas.
+    </p>
+  </div>
+
+  <!-- Reglas -->
+  <div class="mb-12">
+    <ServerRules />
+  </div>
+
+  <!-- Botones de navegación -->
+  <div class="flex flex-col sm:flex-row gap-4 justify-center">
+    <a 
+      href="/conectar" 
+      class="btn btn-success"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+      </svg>
+      <span>Acepto las Reglas - Conectar</span>
+    </a>
+    <a 
+      href="/" 
+      class="btn btn-secondary"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      <span>Volver al Inicio</span>
+    </a>
+  </div>
+</Layout>
+

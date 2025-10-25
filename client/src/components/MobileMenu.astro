@@ -1,0 +1,92 @@
+---
+import ServerStatusIndicator from './ServerStatusIndicator.astro';
+import { DISCORD_INVITE_URL } from '../config';
+---
+
+<script>
+  // Client-side JavaScript for interactivity
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuButton = document.getElementById('mobile-menu-button');
+    const menuContent = document.getElementById('mobile-menu-content');
+    
+    let isOpen = false;
+    
+    menuButton?.addEventListener('click', () => {
+      isOpen = !isOpen;
+      
+      // Update button aria-label
+      if (menuButton) {
+        menuButton.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+        menuButton.setAttribute('aria-expanded', String(isOpen));
+      }
+      
+      // Toggle menu visibility
+      if (menuContent) {
+        if (isOpen) {
+          menuContent.classList.remove('hidden');
+        } else {
+          menuContent.classList.add('hidden');
+        }
+      }
+      
+      // Update icon
+      const openIcon = document.getElementById('menu-open-icon');
+      const closeIcon = document.getElementById('menu-close-icon');
+      
+      if (openIcon && closeIcon) {
+        if (isOpen) {
+          openIcon.classList.add('hidden');
+          closeIcon.classList.remove('hidden');
+        } else {
+          openIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+        }
+      }
+    });
+  });
+</script>
+
+<div class="md:hidden">
+  <!-- Hamburger button -->
+  <button 
+    id="mobile-menu-button"
+    class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition-colors"
+    aria-label="Abrir menú"
+  >
+    <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+    <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+
+  <!-- Mobile menu dropdown -->
+  <div id="mobile-menu-content" class="hidden absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 shadow-xl p-4 z-50">
+    <nav class="flex flex-col space-y-4">
+      <a href="/" class="link !text-gray-300 hover:!text-white py-2">Inicio</a>
+      <a href="/conectar" class="link !text-gray-300 hover:!text-white py-2">Conectar</a>
+      <a href="/mods" class="link !text-gray-300 hover:!text-white py-2">Mods</a>
+      <a href="/reglas" class="link !text-gray-300 hover:!text-white py-2">Reglas</a>
+      
+      <div class="border-t border-gray-800 pt-4 mt-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-400">Estado del servidor:</span>
+          <ServerStatusIndicator />
+        </div>
+      </div>
+      
+      <a 
+        href={DISCORD_INVITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-2 btn btn-primary !px-4 !py-2 text-center flex items-center justify-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 640 512">
+          <path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541zM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241z"/>
+        </svg>
+        Discord
+      </a>
+    </nav>
+  </div>
+</div>

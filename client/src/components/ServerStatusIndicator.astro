@@ -1,0 +1,59 @@
+---
+import { getServerPing } from '../lib/graphql';
+
+// Server-side data fetching
+let isOnline = null;
+try {
+  const data = await getServerPing();
+  isOnline = data.online;
+} catch (err) {
+  console.error('Error fetching server status:', err);
+  isOnline = false;
+}
+---
+
+<script>
+  // Client-side periodic refresh
+  document.addEventListener('DOMContentLoaded', () => {
+    const statusIndicator = document.getElementById('server-status-indicator');
+    const statusDot = document.getElementById('server-status-dot');
+    const statusText = document.getElementById('server-status-text');
+    
+    const fetchStatus = async () => {
+      try {
+        // Show loading state
+        if (statusDot) statusDot.className = 'w-2 h-2 bg-gray-400 rounded-full animate-pulse';
+        if (statusText) statusText.textContent = 'Verificando...';
+        
+        // Fetch status from server
+        const response = await fetch('/api/server-ping');
+        const data = await response.json();
+        
+        // Update UI
+        if (statusDot) {
+          statusDot.className = `w-2 h-2 rounded-full ${data.online ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`;
+        }
+        if (statusText) {
+          statusText.textContent = data.online ? 'Online' : 'Offline';
+        }
+      } catch (err) {
+        console.error('Error fetching server status:', err);
+        if (statusDot) statusDot.className = 'w-2 h-2 bg-red-500 rounded-full';
+        if (statusText) statusText.textContent = 'Offline';
+      }
+    };
+    
+    // Update every 60 seconds
+    const interval = setInterval(fetchStatus, 60000);
+    
+    // Clean up interval on page navigation
+    document.addEventListener('astro:page-load', () => {
+      clearInterval(interval);
+    });
+  });
+</script>
+
+<div id="server-status-indicator" class="flex items-center space-x-1.5">
+  <div id="server-status-dot" class={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : isOnline === false ? 'bg-red-500' : 'bg-gray-400 animate-pulse'}`}></div>
+  <span id="server-status-text" class="text-xs font-medium">{isOnline ? 'Online' : isOnline === false ? 'Offline' : 'Verificando...'}</span>
+</div>

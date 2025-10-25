@@ -1,0 +1,105 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ModsList from '../components/ModsList.astro';
+import { serverMods, clientMods } from '../data/mods';
+
+// Detectar si hay mods requeridos de CLIENTE para mostrar el aviso general
+const hasRequiredClientMods = clientMods.some(mod => mod.required);
+---
+
+<Layout 
+  title="Mods - TSM Kartel & Comp."
+  description="Lista completa de mods del servidor y mods recomendados para cliente"
+>
+  <!-- Header de la página -->
+  <div class="mb-12 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+      📦 Mods del Servidor y Cliente
+    </h1>
+    <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+      Aquí encontrarás todos los mods que afectan el juego. Los mods de cliente
+      son para tu instalación local, mientras que los mods de servidor
+      funcionan en el backend y no necesitan ser instalados por ti.
+    </p>
+  </div>
+
+  {hasRequiredClientMods && (
+    <!-- Información importante (sólo si hay mods de cliente requeridos) -->
+    <div class="mb-8 alert alert-warning">
+      <div class="flex items-start space-x-4">
+        <svg class="w-6 h-6 text-yellow-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <div>
+          <h3 class="text-yellow-300 font-bold mb-2">⚠️ Importante: Mods de Cliente Requeridos</h3>
+          <p class="text-yellow-200/90 text-sm mb-2">
+            Los mods marcados con <span class="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30 font-semibold">Requerido</span> 
+            en la sección de cliente son necesarios para conectarte al servidor. Para instalar los mods, 
+            visita nuestra <a href="/conectar" class="link">guía de conexión</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <ModsList 
+      title="Mods de Cliente (Recomendados)"
+      description="Mods opcionales para Minecraft 1.21.7 con Fabric. Mejoran tu experiencia, pero instala Fabric Loader primero."
+      mods={clientMods}
+    />
+    <ModsList 
+      title="Mods del Servidor (No Requeridos)"
+      description="Estos mods están instalados en el servidor y afectan la jugabilidad. No necesitan ser instalados por el usuario."
+      mods={serverMods}
+    />
+  </div>
+
+  <!-- Aviso para mods de cliente no probados -->
+  <div class="mb-12 alert alert-info text-center">
+    <p class="text-blue-300 text-sm">
+      Puedes instalar otros mods de cliente bajo tu propia responsabilidad. 
+      No garantizamos su funcionamiento ni la compatibilidad con el servidor. 
+      Para ver cómo instalar mods, visita nuestra 
+      <a href="/conectar" class="link">guía de conexión</a>.
+    </p>
+  </div>
+
+  <!-- Botones de navegación -->
+  <div class="flex flex-col sm:flex-row gap-4 justify-center">
+    <a 
+      href="/conectar" 
+      class="btn btn-success"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span>Ver Guía de Conexión</span>
+    </a>
+    <a 
+      href="/" 
+      class="btn btn-secondary"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      <span>Volver al Inicio</span>
+    </a>
+  </div>
+</Layout>
+
+<style>
+  details > summary {
+    list-style: none;
+  }
+  
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  details[open] > summary {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+</style>
+

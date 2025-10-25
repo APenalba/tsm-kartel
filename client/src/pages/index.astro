@@ -1,0 +1,236 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ServerStatus from '../components/ServerStatus.astro';
+import HallOfFameLeaderboard from '../components/HallOfFameLeaderboard.astro';
+import { SERVER_IP, SERVER_PORT_DIRECT, SERVER_NAME, SERVER_DESCRIPTION, DISCORD_INVITE_URL } from '../config';
+
+const fullServerAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
+---
+
+<Layout>
+  <section class="mb-12">
+    <div class="text-center mb-8">
+      <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-pulse">
+        {SERVER_NAME}
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+        {SERVER_DESCRIPTION}
+      </p>
+    </div>
+
+    <!-- Server IP Card - Destacado -->
+    <div class="max-w-2xl mx-auto mb-12">
+      <div class="card p-8 shadow-2xl border-2 border-green-600/60">
+        <div class="text-center mb-4">
+          <h2 class="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 019-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+            </svg>
+            Dirección del Servidor
+          </h2>
+        </div>
+        <div class="rounded-xl p-6 border border-green-700/30 bg-gray-950/70">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left flex-1">
+              <div class="font-mono text-2xl md:text-3xl font-bold text-white tracking-wider mb-2">
+                {fullServerAddress}
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <button 
+                id="copyButton"
+                class="btn btn-success shadow-md border border-green-500"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Copiar IP
+              </button>
+            </div>
+            
+            <script define:vars={{SERVER_IP, SERVER_PORT_DIRECT}}>
+              document.addEventListener('DOMContentLoaded', () => {
+                const copyButton = document.getElementById('copyButton');
+                const serverAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
+                
+                // Función para copiar texto usando un método alternativo
+                function copyTextToClipboard(text) {
+                  // Crear un elemento textarea temporal
+                  const textArea = document.createElement('textarea');
+                  textArea.value = text;
+                  
+                  // Hacer que el textarea no sea visible
+                  textArea.style.position = 'fixed';
+                  textArea.style.top = '0';
+                  textArea.style.left = '0';
+                  textArea.style.width = '2em';
+                  textArea.style.height = '2em';
+                  textArea.style.padding = '0';
+                  textArea.style.border = 'none';
+                  textArea.style.outline = 'none';
+                  textArea.style.boxShadow = 'none';
+                  textArea.style.background = 'transparent';
+                  
+                  document.body.appendChild(textArea);
+                  textArea.focus();
+                  textArea.select();
+                  
+                  let successful = false;
+                  try {
+                    successful = document.execCommand('copy');
+                  } catch (err) {
+                    console.error('No se pudo copiar el texto');
+                  }
+                  
+                  document.body.removeChild(textArea);
+                  return successful;
+                }
+                
+                copyButton.addEventListener('click', () => {
+                  const originalContent = copyButton.innerHTML;
+                  
+                  try {
+                    // Intentar usar la API moderna de portapapeles
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                      navigator.clipboard.writeText(serverAddress)
+                        .then(() => {
+                          showCopiedMessage();
+                        })
+                        .catch(() => {
+                          // Si falla, usar el método alternativo
+                          if (copyTextToClipboard(serverAddress)) {
+                            showCopiedMessage();
+                          }
+                        });
+                    } else {
+                      // Usar el método alternativo si la API moderna no está disponible
+                      if (copyTextToClipboard(serverAddress)) {
+                        showCopiedMessage();
+                      }
+                    }
+                  } catch (e) {
+                    // Último intento con el método alternativo
+                    if (copyTextToClipboard(serverAddress)) {
+                      showCopiedMessage();
+                    }
+                  }
+                  
+                  function showCopiedMessage() {
+                    copyButton.innerHTML = `<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>¡Copiado!`;
+                    
+                    setTimeout(() => {
+                      copyButton.innerHTML = originalContent;
+                    }, 3000);
+                  }
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <a 
+            href="/conectar" 
+            class="link text-green-400 hover:text-green-300"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            ¿No sabes cómo conectarte? Ver guía completa
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Hall of Fame Leaderboard -->
+    <div class="max-w-4xl mx-auto mb-12">
+      <HallOfFameLeaderboard />
+    </div>
+
+    <!-- Server Status Card -->
+    <div class="max-w-4xl mx-auto mb-12">
+      <ServerStatus />
+    </div>
+
+  </section>
+
+  <!-- Quick Links Section -->
+  <section class="mb-16">
+    <h2 class="text-3xl font-bold text-white text-center mb-8">
+      Información del Servidor
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a 
+        href="/conectar" 
+        class="group card hover:border-green-500 transition-all hover:scale-105"
+      >
+        <div class="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-600/30 transition-colors">
+          <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-green-400 transition-colors">Cómo Conectarse</h3>
+        <p class="text-gray-400 text-sm">
+          Guía paso a paso para unirte al servidor
+        </p>
+      </a>
+
+      <a 
+        href="/mods" 
+        class="group card hover:border-blue-500 transition-all hover:scale-105"
+      >
+        <div class="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-600/30 transition-colors">
+          <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Mods</h3>
+        <p class="text-gray-400 text-sm">
+          Lista completa de mods del servidor y recomendados
+        </p>
+      </a>
+
+      <a 
+        href="/reglas" 
+        class="group card hover:border-purple-500 transition-all hover:scale-105"
+      >
+        <div class="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-600/30 transition-colors">
+          <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Reglas</h3>
+        <p class="text-gray-400 text-sm">
+          Lee las reglas del servidor antes de jugar
+        </p>
+      </a>
+
+      <a 
+        href={DISCORD_INVITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group card hover:border-indigo-500 transition-all hover:scale-105"
+      >
+        <div class="w-12 h-12 bg-indigo-600/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-600/30 transition-colors">
+          <svg class="w-6 h-6 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">Discord</h3>
+        <p class="text-gray-400 text-sm">
+          Únete a nuestra comunidad
+        </p>
+      </a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+</style>

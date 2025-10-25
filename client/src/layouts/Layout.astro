@@ -1,0 +1,178 @@
+---
+import '../styles/global.css';
+import ServerStatusIndicator from '../components/ServerStatusIndicator.astro';
+import MobileMenu from '../components/MobileMenu.astro';
+import { 
+  DISCORD_INVITE_URL, 
+  GITHUB_URL, 
+  SITE_NAME, 
+  SITE_DESCRIPTION, 
+  SERVER_VERSION, 
+  SERVER_MODLOADER 
+} from '../config';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = `${SITE_NAME} - Servidor Minecraft`,
+  description = SITE_DESCRIPTION
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0b0f19" />
+    <link rel="canonical" href={`${new URL(Astro.url.pathname, 'https://tsm-kartel.com').toString()}`} />
+    <link rel="preconnect" href="https://mc-heads.net" crossorigin />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    
+    <title>{title}</title>
+  </head>
+  <body class="bg-gray-950 text-gray-100 min-h-screen">
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none"></div>
+    
+    <!-- Header -->
+    <header id="site-header" class="relative z-50 border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 transition-transform duration-300">
+      <nav class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                {SITE_NAME}
+              </h1>
+              <p class="text-xs text-gray-400">Minecraft {SERVER_VERSION} {SERVER_MODLOADER}</p>
+            </div>
+            <div class="border-l border-gray-700 h-5 mx-1"></div>
+            <div class="text-gray-300">
+              <ServerStatusIndicator />
+            </div>
+          </div>
+          
+          <div class="hidden md:flex items-center space-x-6">
+            <a href="/" class="text-gray-300 hover:text-white transition-colors">Inicio</a>
+            <a href="/conectar" class="text-gray-300 hover:text-white transition-colors">Conectar</a>
+            <a href="/mods" class="text-gray-300 hover:text-white transition-colors">Mods</a>
+            <a href="/reglas" class="text-gray-300 hover:text-white transition-colors">Reglas</a>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <a 
+              href={DISCORD_INVITE_URL}
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="hidden md:flex px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all items-center space-x-2"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 640 512">
+                <path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541zM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241z"/>
+              </svg>
+              <span>Discord</span>
+            </a>
+            <MobileMenu />
+          </div>
+        </div>
+      </nav>
+    </header>
+    
+    <script>
+      // Script to handle header visibility on scroll
+      document.addEventListener('DOMContentLoaded', () => {
+        const header = document.getElementById('site-header');
+        const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+        let lastScrollY = 0;
+        
+        // Only apply this behavior on the homepage
+        if (isHomePage && header) {
+          // Initially hide the header on homepage
+          header.style.transform = 'translateY(-100%)';
+          
+          window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            
+            // Show header when scrolling down more than 100px
+            if (currentScrollY > 100) {
+              header.style.transform = 'translateY(0)';
+            } else {
+              // Hide header when at the top of the page
+              header.style.transform = 'translateY(-100%)';
+            }
+            
+            lastScrollY = currentScrollY;
+          });
+        }
+      });
+    </script>
+
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-4 py-8">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-gray-800 bg-gray-900/50 backdrop-blur-sm mt-16">
+      <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="font-bold text-white mb-3">{SITE_NAME}</h3>
+            <p class="text-gray-400 text-sm">
+              {SITE_DESCRIPTION}
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="font-bold text-white mb-3">Enlaces Rápidos</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/conectar" class="text-gray-400 hover:text-white transition-colors">Cómo Conectarse</a></li>
+              <li><a href="/mods" class="text-gray-400 hover:text-white transition-colors">Mods</a></li>
+              <li><a href="/reglas" class="text-gray-400 hover:text-white transition-colors">Reglas</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="font-bold text-white mb-3">Comunidad</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">Discord</a></li>
+              <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">GitHub</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+          <p>&copy; {new Date().getFullYear()} {SITE_NAME}. Todos los derechos reservados.</p>
+          <p class="mt-2">Minecraft es una marca registrada de Mojang Studios.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  
+  :global(body) {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  :global(.font-minecraft) {
+    font-family: 'Courier New', monospace;
+  }
+</style>
+

@@ -1,0 +1,124 @@
+---
+import { SERVER_IP, SERVER_PORT_DIRECT, SERVER_VERSION, SERVER_MODLOADER } from '../config';
+---
+
+<div id="conectar" class="card">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-white mb-2">Cómo Conectarse</h2>
+    <p class="text-gray-400 text-sm">Sigue estos pasos para unirte al servidor</p>
+  </div>
+
+  <!-- Steps -->
+  <div class="space-y-4">
+    <div class="panel">
+      <div class="flex items-start space-x-4">
+        <div class="badge badge-primary flex-shrink-0 w-8 h-8 !text-base">1</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-white mb-2">Descarga el Launcher de Minecraft</h3>
+          <p class="text-gray-400 text-sm mb-3">
+            Descarga el <a href="https://www.minecraft.net/download" target="_blank" class="link">Launcher oficial de Minecraft</a> 
+            si aún no lo tienes instalado.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="flex items-start space-x-4">
+        <div class="badge badge-primary flex-shrink-0 w-8 h-8 !text-base">2</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-white mb-2">Crea una instalación de Minecraft 1.21.7</h3>
+          <p class="text-gray-400 text-sm mb-3">
+            En el launcher, ve a "Instalaciones" → "Nueva instalación" y selecciona la versión 1.21.7.
+          </p>
+          <div class="panel-subtle">
+            <code class="text-green-400 text-sm">
+              Instalaciones → Nueva instalación → Versión: 1.21.7 → Crear
+            </code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="flex items-start space-x-4">
+        <div class="badge badge-primary flex-shrink-0 w-8 h-8 !text-base">3</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-white mb-2">(Opcional) Instala Fabric y Mods</h3>
+          <p class="text-gray-400 text-sm mb-3">
+            Si deseas usar mods, descarga e instala <a href="https://fabricmc.net/use/installer/" target="_blank" class="link">Fabric Loader</a> 
+            para Minecraft 1.21.7.
+          </p>
+          <div class="panel-subtle">
+            <code class="text-green-400 text-sm">
+              Fabric Installer → Versión 1.21.7 → Install
+            </code>
+          </div>
+          <p class="text-gray-400 text-sm mt-3">
+            <span class="text-yellow-400">Nota:</span> Si no tienes Java instalado y aparece un error, simplemente inicia cualquier versión de Minecraft primero. 
+            El launcher instalará Java automáticamente, luego ciérralo y continúa con los pasos.
+          </p>
+          <p class="text-gray-400 text-sm mt-3">
+            <span class="text-yellow-400">Importante:</span> Después de instalar Fabric, <strong>reinicia el launcher de Minecraft</strong> para que se cree el perfil de Fabric.
+          </p>
+          <p class="text-gray-400 text-sm mt-3">
+            Puedes instalar mods opcionales que mejoran la experiencia de juego. Visita nuestra <a href="/mods" class="link">página de mods recomendados</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="flex items-start space-x-4">
+        <div class="badge badge-primary flex-shrink-0 w-8 h-8 !text-base">4</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-white mb-2">Inicia Minecraft</h3>
+          <p class="text-gray-400 text-sm mb-3">
+            Abre el launcher de Minecraft y selecciona el perfil "1.21.7" o "Fabric 1.21.7" si instalaste Fabric.
+          </p>
+          <p class="text-gray-400 text-sm">
+            Si no ves el perfil de Fabric y lo has instalado, verifica que hayas reiniciado el launcher. Si aún no aparece, puedes crear manualmente una instalación seleccionando la versión "fabric-loader-1.21.7".
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="flex items-start space-x-4">
+        <div class="badge badge-success flex-shrink-0 w-8 h-8 !text-base">5</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-white mb-2">Conecta al Servidor</h3>
+          <p class="text-gray-400 text-sm mb-3">
+            En Minecraft, ve a Multijugador → Añadir Servidor y pega la dirección:
+          </p>
+          <div class="panel-subtle">
+            <code class="text-green-400 font-mono">{SERVER_IP}:{SERVER_PORT_DIRECT}</code>
+          </div>
+          <p class="text-gray-400 text-sm mt-3">
+            ¡Haz clic en el servidor y disfruta jugando en TSM Kartel & Comp.!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="mt-6 alert alert-warning">
+    <div class="flex items-start space-x-3">
+      <svg class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+      <div class="text-sm">
+        <p class="font-semibold text-yellow-300 mb-1">¿Problemas para conectar?</p>
+        <ul class="text-yellow-200/80 space-y-1 ml-4 list-disc">
+          <li>Verifica que tengas la versión correcta de Minecraft (1.21.7)</li>
+          <li>Si usas Fabric, asegúrate de haber reiniciado el launcher después de instalarlo</li>
+          <li>Si instalaste mods opcionales, verifica que sean compatibles con la versión 1.21.7</li>
+          <li>Revisa que no haya errores en la consola de Minecraft</li>
+          <li>Contacta en Discord si el problema persiste</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
