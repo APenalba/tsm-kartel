@@ -1,0 +1,37 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pytest_cache/
+.mypy_cache/
+.pytype/
+.coverage
+htmlcov/
+
+# Env & virtualenvs
+.env
+.venv
+venv/
+
+# Logs
+*.log
+app.log
+
+# Node / misc
+node_modules/
+dist/
+build/
+.cache/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Large or runtime data
+data/

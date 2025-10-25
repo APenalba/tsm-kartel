@@ -1,0 +1,21 @@
+{
+  "name": "@mc-api-service",
+  "version": "1.0.0",
+  "description": "GraphQL API for Minecraft Java Server information",
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8000",
+    "docker:build": "docker build -t mc-api-service .",
+    "docker:run": "docker run -p 8000:8000 --env-file .env mc-api-service"
+  },
+  "keywords": [
+    "minecraft",
+    "graphql",
+    "api",
+    "python",
+    "fastapi"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+
