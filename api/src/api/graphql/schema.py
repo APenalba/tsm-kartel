@@ -228,6 +228,11 @@ class Query:
                 description = status.description.to_plain()
             elif hasattr(status.description, '__str__'):
                 description = str(status.description)
+        elif hasattr(status, 'motd') and hasattr(status.motd, 'to_plain'):
+            # Handle cases where motd is a Motd object
+            description = status.motd.to_plain()
+        elif hasattr(status, 'motd') and isinstance(status.motd, str):
+            description = status.motd
 
         return ServerStatus(
             online=True,
@@ -244,11 +249,12 @@ class Query:
                 players=players_list
             ) if status.players else None,
             latency=status.latency if hasattr(status, 'latency') else None,
-            favicon=status.favicon if hasattr(status, 'favicon') else None,
-            enforces_secure_chat=status.enforces_secure_chat if hasattr(
-                status, 'enforces_secure_chat') else None,
-            previews_chat=status.previews_chat if hasattr(
-                status, 'previews_chat') else None,
+            favicon=(status.favicon if hasattr(status, 'favicon') and status.favicon
+                     else status.raw.get('favicon') if hasattr(status, 'raw') else None),
+            enforces_secure_chat=(status.enforces_secure_chat if hasattr(status, 'enforces_secure_chat')
+                                  else status.raw.get('enforcesSecureChat') if hasattr(status, 'raw') else None),
+            previews_chat=(status.previews_chat if hasattr(status, 'previews_chat')
+                           else status.raw.get('previewsChat') if hasattr(status, 'raw') else None),
             queried_at=datetime.now(timezone.utc).isoformat()
         )
 
