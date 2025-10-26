@@ -8,6 +8,8 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://tsm.apenalba.me',
+  base: '/',
   output: 'server',
   adapter: vercel(),
   vite: {
