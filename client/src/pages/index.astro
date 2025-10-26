@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ServerStatus from '../components/ServerStatus.astro';
 import HallOfFameLeaderboard from '../components/HallOfFameLeaderboard.astro';
+import CopyToClipboardButton from '../components/CopyToClipboardButton.astro'; // Import the new component
 import { SERVER_IP, SERVER_PORT_DIRECT, SERVER_NAME, SERVER_DESCRIPTION, DISCORD_INVITE_URL } from '../config';
 
 const fullServerAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
@@ -23,8 +24,8 @@ const fullServerAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
       <div class="card p-8 shadow-2xl border-2 border-green-600/60">
         <div class="text-center mb-4">
           <h2 class="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 019-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"></path>
             </svg>
             Dirección del Servidor
           </h2>
@@ -37,94 +38,8 @@ const fullServerAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
               </div>
             </div>
             <div class="flex-shrink-0">
-              <button 
-                id="copyButton"
-                class="btn btn-success shadow-md border border-green-500"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-                Copiar IP
-              </button>
+              <CopyToClipboardButton textToCopy={fullServerAddress} client:load />
             </div>
-            
-            <script define:vars={{SERVER_IP, SERVER_PORT_DIRECT}}>
-              document.addEventListener('DOMContentLoaded', () => {
-                const copyButton = document.getElementById('copyButton');
-                const serverAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
-                
-                // Función para copiar texto usando un método alternativo
-                function copyTextToClipboard(text) {
-                  // Crear un elemento textarea temporal
-                  const textArea = document.createElement('textarea');
-                  textArea.value = text;
-                  
-                  // Hacer que el textarea no sea visible
-                  textArea.style.position = 'fixed';
-                  textArea.style.top = '0';
-                  textArea.style.left = '0';
-                  textArea.style.width = '2em';
-                  textArea.style.height = '2em';
-                  textArea.style.padding = '0';
-                  textArea.style.border = 'none';
-                  textArea.style.outline = 'none';
-                  textArea.style.boxShadow = 'none';
-                  textArea.style.background = 'transparent';
-                  
-                  document.body.appendChild(textArea);
-                  textArea.focus();
-                  textArea.select();
-                  
-                  let successful = false;
-                  try {
-                    successful = document.execCommand('copy');
-                  } catch (err) {
-                    console.error('No se pudo copiar el texto');
-                  }
-                  
-                  document.body.removeChild(textArea);
-                  return successful;
-                }
-                
-                copyButton.addEventListener('click', () => {
-                  const originalContent = copyButton.innerHTML;
-                  
-                  try {
-                    // Intentar usar la API moderna de portapapeles
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                      navigator.clipboard.writeText(serverAddress)
-                        .then(() => {
-                          showCopiedMessage();
-                        })
-                        .catch(() => {
-                          // Si falla, usar el método alternativo
-                          if (copyTextToClipboard(serverAddress)) {
-                            showCopiedMessage();
-                          }
-                        });
-                    } else {
-                      // Usar el método alternativo si la API moderna no está disponible
-                      if (copyTextToClipboard(serverAddress)) {
-                        showCopiedMessage();
-                      }
-                    }
-                  } catch (e) {
-                    // Último intento con el método alternativo
-                    if (copyTextToClipboard(serverAddress)) {
-                      showCopiedMessage();
-                    }
-                  }
-                  
-                  function showCopiedMessage() {
-                    copyButton.innerHTML = `<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>¡Copiado!`;
-                    
-                    setTimeout(() => {
-                      copyButton.innerHTML = originalContent;
-                    }, 3000);
-                  }
-                });
-              });
-            </script>
           </div>
         </div>
         <div class="mt-4 text-center">
@@ -222,6 +137,7 @@ const fullServerAddress = `${SERVER_IP}:${SERVER_PORT_DIRECT}`;
       </a>
     </div>
   </section>
+
 </Layout>
 
 <style>
