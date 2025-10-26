@@ -2,13 +2,14 @@
 import '../styles/global.css';
 import ServerStatusIndicator from '../components/ServerStatusIndicator.astro';
 import MobileMenu from '../components/MobileMenu.astro';
-import { 
-  DISCORD_INVITE_URL, 
-  GITHUB_URL, 
-  SITE_NAME, 
-  SITE_DESCRIPTION, 
-  SERVER_VERSION, 
-  SERVER_MODLOADER 
+import { getServerStatus, type ServerStatus } from '../lib/graphql';
+import {
+  DISCORD_INVITE_URL,
+  GITHUB_URL,
+  SITE_NAME,
+  SITE_DESCRIPTION,
+  SERVER_VERSION,
+  SERVER_MODLOADER
 } from '../config';
 
 interface Props {
@@ -16,10 +17,19 @@ interface Props {
   description?: string;
 }
 
-const { 
+const {
   title = `${SITE_NAME} - Servidor Minecraft`,
   description = SITE_DESCRIPTION
 } = Astro.props;
+
+let serverStatus: ServerStatus | undefined;
+try {
+  serverStatus = await getServerStatus();
+} catch (error) {
+  console.error('Failed to fetch server status:', error);
+}
+
+const faviconUrl = serverStatus?.favicon || '/favicon.svg';
 ---
 
 <!doctype html>
@@ -28,7 +38,7 @@ const {
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href={faviconUrl} />
     <meta name="theme-color" content="#0b0f19" />
     <link rel="canonical" href={`${new URL(Astro.url.pathname, 'https://tsm-kartel.com').toString()}`} />
     <link rel="preconnect" href="https://mc-heads.net" crossorigin />
