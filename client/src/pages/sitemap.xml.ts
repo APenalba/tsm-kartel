@@ -8,6 +8,7 @@ const routes = [
   '/conectar',
   '/mods',
   '/reglas',
+  '/estadisticas',
 ];
 
 export const GET: APIRoute = async () => {

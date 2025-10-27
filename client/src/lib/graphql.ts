@@ -65,6 +65,50 @@ export const GET_HALL_OF_FAME_LEADERBOARD = gql`
   }
 `;
 
+export const GET_PLAYER_STATISTICS = gql`
+  query GetPlayerStatistics($playerId: Int!) {
+    playerStatistics(playerId: $playerId) {
+      playerId
+      uuidMapEntry {
+        id
+        playerUuid
+        playerNick
+        playerLastOnline
+      }
+      hallOfFameEntry {
+        playerId
+        firstPlace
+        secondPlace
+        thirdPlace
+        fourthPlace
+        fifthPlace
+        score
+      }
+      broken { statName amount position }
+      crafted { statName amount position }
+      custom { statName amount position }
+      dropped { statName amount position }
+      killed { statName amount position }
+      killedBy { statName amount position }
+      mined { statName amount position }
+      pickedUp { statName amount position }
+      used { statName amount position }
+    }
+  }
+`;
+
+export const GET_SYNC_METADATA = gql`
+  query GetSyncMetadata {
+    syncMetadata {
+      lastUpdate
+      serverName
+      serverDesc
+      serverUrl
+      serverIcon
+    }
+  }
+`;
+
 // Tipos
 export interface Player {
   name: string;
@@ -76,6 +120,52 @@ export interface PlayerScoreEntry {
   playerNick?: string;
   score: number;
   isBot: boolean;
+}
+
+export interface PlayerStatisticEntry {
+  statName: string;
+  amount: number;
+  position?: number;
+}
+
+export interface PlayerUUIDMap {
+  id: number;
+  playerUuid: string;
+  playerNick?: string;
+  playerLastOnline?: string;
+}
+
+export interface HallOfFameEntry {
+  playerId: number;
+  firstPlace: number;
+  secondPlace: number;
+  thirdPlace: number;
+  fourthPlace: number;
+  fifthPlace: number;
+  score: number;
+}
+
+export interface PlayerStatistics {
+  playerId: number;
+  uuidMapEntry?: PlayerUUIDMap | null;
+  broken?: PlayerStatisticEntry[] | null;
+  crafted?: PlayerStatisticEntry[] | null;
+  custom?: PlayerStatisticEntry[] | null;
+  dropped?: PlayerStatisticEntry[] | null;
+  killed?: PlayerStatisticEntry[] | null;
+  killedBy?: PlayerStatisticEntry[] | null;
+  mined?: PlayerStatisticEntry[] | null;
+  pickedUp?: PlayerStatisticEntry[] | null;
+  used?: PlayerStatisticEntry[] | null;
+  hallOfFameEntry?: HallOfFameEntry | null;
+}
+
+export interface SyncMetadata {
+  lastUpdate?: string | null;
+  serverName?: string | null;
+  serverDesc?: string | null;
+  serverUrl?: string | null;
+  serverIcon?: string | null;
 }
 
 export interface PlayerInfo {
@@ -131,5 +221,18 @@ export async function getHallOfFameLeaderboard(limit: number = 15, excludeBots: 
 export async function refreshPlayerStatsDb(): Promise<boolean> {
   const data = await graphqlClient.request<{ refreshPlayerStatsDb: boolean }>(REFRESH_PLAYER_STATS_DB);
   return data.refreshPlayerStatsDb;
+}
+
+export async function getPlayerStatistics(playerId: number): Promise<PlayerStatistics | null> {
+  const data = await graphqlClient.request<{ playerStatistics: PlayerStatistics | null }>(
+    GET_PLAYER_STATISTICS,
+    { playerId }
+  );
+  return data.playerStatistics;
+}
+
+export async function getSyncMetadata(): Promise<SyncMetadata | null> {
+  const data = await graphqlClient.request<{ syncMetadata: SyncMetadata | null }>(GET_SYNC_METADATA);
+  return data.syncMetadata ?? null;
 }
 
