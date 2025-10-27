@@ -12,6 +12,7 @@ import {
   SERVER_MODLOADER
 } from '../config';
 import  SpeedInsights  from "@vercel/speed-insights/astro"
+import CursorEffects from '../components/CursorEffects';
 import Analytics from '@vercel/analytics/astro'
 
 interface Props {
@@ -54,6 +55,19 @@ const faviconUrl = serverStatus?.favicon || '/favicon.svg';
     <title>{title}</title>
   </head>
   <body class="bg-gray-950 text-gray-100 min-h-screen">
+    <div>
+      <CursorEffects
+        client:load
+        enabled={true}
+        hideSystemCursor={true}
+        showCursorDot={false}
+        cursorDotShape="crosshair"
+        cursorDotColor="#ffffff"
+        crosshairSize={8}
+        crosshairThickness={2}
+        crosshairGap={2}
+      />
+    </div>
     <!-- Background Pattern -->
     <div class="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none"></div>
     
