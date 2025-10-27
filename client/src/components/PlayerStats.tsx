@@ -43,6 +43,26 @@ function formatNumber(n?: number | null): string {
   return new Intl.NumberFormat('es-ES').format(n);
 }
 
+function formatPlayTime(ticks: number): string {
+  if (ticks === 0) return '0 segundos';
+  
+  // Convertir ticks a segundos (20 ticks = 1 segundo)
+  const totalSeconds = Math.floor(ticks / 20);
+  
+  const days = Math.floor(totalSeconds / (24 * 60 * 60));
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const remainingSeconds = totalSeconds % 60;
+  
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (remainingSeconds > 0) parts.push(`${remainingSeconds}s`);
+  
+  return parts.join(', ');
+}
+
 function titleCase(s: string): string {
   return s
     .replace(/_/g, ' ')
@@ -67,6 +87,15 @@ export default function PlayerStats() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [loadingLb, setLoadingLb] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle initial URL player ID
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const playerId = params.get('player');
+    if (playerId && !selectedPlayerId) {
+      setSelectedPlayerId(Number(playerId));
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -190,7 +219,12 @@ export default function PlayerStats() {
                     <li key={p.playerId}>
                       <button
                         className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-gray-800/60 ${selectedPlayerId === p.playerId ? 'bg-gray-800/60' : ''}`}
-                        onClick={() => setSelectedPlayerId(p.playerId)}
+                        onClick={() => {
+                          setSelectedPlayerId(p.playerId);
+                          const url = new URL(window.location.href);
+                          url.searchParams.set('player', String(p.playerId));
+                          window.history.pushState({}, '', url.toString());
+                        }}
                       >
                         <div>
                           <div className="text-sm font-medium text-white">{p.playerNick || `ID ${p.playerId}`}</div>
@@ -217,7 +251,7 @@ export default function PlayerStats() {
             <MetricCard label="Muertes" value={formatNumber(mainMetrics.deaths)} />
             <MetricCard label="Daño Hecho" value={formatNumber(mainMetrics.dmgDealt)} />
             <MetricCard label="Daño Recibido" value={formatNumber(mainMetrics.dmgTaken)} />
-            <MetricCard label="Tiempo de juego" value={formatNumber(mainMetrics.playTime)} highlight="unidades crudas" />
+            <MetricCard label="Tiempo de juego" value={formatPlayTime(mainMetrics.playTime)} />
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
