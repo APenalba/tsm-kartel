@@ -53,7 +53,7 @@ export default function PlayerStatsCharts({
   return (
     <>
       {/* Grid de gráficos principales */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
         {/* Bar Chart - Bloques Minados */}
         <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 min-w-0">
           <div className="mb-3 text-sm font-medium">Top Bloques Minados</div>
@@ -62,8 +62,18 @@ export default function PlayerStatsCharts({
               <BarChart data={mined}>
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ background: '#111827', border: '1px solid #1f2937' }} />
-                <Bar dataKey="value" fill="#22d3ee" />
+                <Tooltip 
+                  cursor={false}
+                  contentStyle={{ 
+                    background: '#1f2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '0.5rem',
+                    color: '#f3f4f6'
+                  }}
+                  labelStyle={{ color: '#e5e7eb', fontWeight: 500 }}
+                  itemStyle={{ color: '#22d3ee' }}
+                />
+                <Bar dataKey="value" fill="#22d3ee" activeBar={{ fill: '#0891b2' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -80,7 +90,16 @@ export default function PlayerStatsCharts({
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#111827', border: '1px solid #1f2937' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: '#1f2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '0.5rem',
+                    color: '#f3f4f6'
+                  }}
+                  labelStyle={{ color: '#e5e7eb', fontWeight: 500 }}
+                  itemStyle={{ color: '#f3f4f6' }}
+                />
                 <Legend wrapperStyle={{ color: '#e5e7eb' }} />
               </PieChart>
             </ResponsiveContainer>
@@ -96,8 +115,18 @@ export default function PlayerStatsCharts({
             <BarChart data={custom}>
               <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
               <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: '#111827', border: '1px solid #1f2937' }} />
-              <Bar dataKey="value" fill="#34d399" />
+              <Tooltip 
+                cursor={false}
+                contentStyle={{ 
+                  background: '#1f2937', 
+                  border: '1px solid #374151',
+                  borderRadius: '0.5rem',
+                  color: '#f3f4f6'
+                }}
+                labelStyle={{ color: '#e5e7eb', fontWeight: 500 }}
+                itemStyle={{ color: '#34d399' }}
+              />
+              <Bar dataKey="value" fill="#34d399" activeBar={{ fill: '#059669' }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
