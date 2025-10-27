@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PlayerStats from '../components/PlayerStats';
+import PlayerStatsView from '../components/PlayerStatsView.astro';
 
 const title = 'Estadísticas de Jugadores';
 ---
@@ -15,7 +15,7 @@ const title = 'Estadísticas de Jugadores';
     </div>
 
     <div class="rounded-2xl border border-gray-800 bg-gray-900/40 p-4">
-      <PlayerStats client:load />
+      <PlayerStatsView />
     </div>
   </section>
 </Layout>

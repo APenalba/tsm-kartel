@@ -1,0 +1,412 @@
+---
+import {
+  getHallOfFameLeaderboard,
+  getPlayerStatistics,
+  getSyncMetadata,
+  type PlayerScoreEntry,
+  type PlayerStatistics,
+  type PlayerStatisticEntry,
+} from '../lib/graphql';
+import PlayerStatsCharts from './PlayerStatsCharts';
+
+// Server-side data fetching
+let leaderboard: PlayerScoreEntry[] = [];
+let stats: PlayerStatistics | null = null;
+let error: string | null = null;
+let selectedPlayerId: number | null = null;
+
+// Check URL for player parameter
+const url = new URL(Astro.request.url);
+const playerIdParam = url.searchParams.get('player');
+
+try {
+  // Fetch leaderboard
+  leaderboard = await getHallOfFameLeaderboard(50, true);
+  
+  // Auto-select first player or from URL
+  if (playerIdParam) {
+    selectedPlayerId = Number(playerIdParam);
+  } else if (leaderboard.length > 0) {
+    selectedPlayerId = leaderboard[0].playerId;
+  }
+  
+  // Fetch stats for selected player
+  if (selectedPlayerId) {
+    stats = await getPlayerStatistics(selectedPlayerId);
+  }
+} catch (e) {
+  error = 'No se pudo cargar las estadísticas.';
+  console.error(e);
+}
+
+// Helper functions
+function formatNumber(n?: number | null): string {
+  if (n == null) return '—';
+  return new Intl.NumberFormat('es-ES').format(n);
+}
+
+function formatPlayTime(ticks: number): string {
+  if (ticks === 0) return '0 segundos';
+  
+  const totalSeconds = Math.floor(ticks / 20);
+  
+  const days = Math.floor(totalSeconds / (24 * 60 * 60));
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const remainingSeconds = totalSeconds % 60;
+  
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (remainingSeconds > 0) parts.push(`${remainingSeconds}s`);
+  
+  return parts.join(', ');
+}
+
+function titleCase(s: string): string {
+  return s
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function pickTop(entries: PlayerStatisticEntry[] | null | undefined, n = 10) {
+  return (entries ?? [])
+    .slice()
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, n);
+}
+
+// Process stats
+const customMap = new Map<string, number>();
+(stats?.custom || []).forEach((e) => customMap.set(e.statName, e.amount));
+
+const mainMetrics = {
+  kills: customMap.get('player_kills') ?? 0,
+  mobKills: customMap.get('mob_kills') ?? 0,
+  deaths: customMap.get('deaths') ?? 0,
+  dmgDealt: customMap.get('damage_dealt') ?? 0,
+  dmgTaken: customMap.get('damage_taken') ?? 0,
+  playTime: customMap.get('play_time') ?? 0,
+};
+
+const minedTop = pickTop(stats?.mined, 12).map((e) => ({ name: titleCase(e.statName), value: e.amount }));
+const killedTop = pickTop(stats?.killed, 10).map((e) => ({ name: titleCase(e.statName), value: e.amount }));
+const customTop = pickTop(stats?.custom, 12).map((e) => ({ name: e.statName, value: e.amount }));
+---
+
+<div class="relative" id="player-stats-container">
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      {selectedPlayerId && stats ? (
+        <img 
+          id="player-avatar"
+          src={`https://mc-heads.net/avatar/${stats.uuidMapEntry?.playerNick || 'MHF_Steve'}/100`} 
+          alt={stats.uuidMapEntry?.playerNick || 'Unknown Player'} 
+          class="h-10 w-10 rounded" 
+        />
+      ) : (
+        <div id="player-avatar" class="h-10 w-10 rounded bg-gradient-to-br from-emerald-500 to-cyan-600" />
+      )}
+      <div>
+        <div id="player-name" class="text-lg font-semibold">
+          {stats?.uuidMapEntry?.playerNick ? `Estadísticas de ${stats.uuidMapEntry.playerNick}` : 'Estadísticas de Jugadores'}
+        </div>
+        <div class="text-xs text-gray-400">Ranking Hall of Fame · {leaderboard.length} jugadores</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <form method="get" class="flex items-center gap-2">
+        <input
+          type="text"
+          name="search"
+          id="search-input"
+          class="rounded-lg border border-gray-700 bg-gray-900/70 px-3 py-2 text-sm outline-none focus:border-cyan-500"
+          placeholder="Buscar jugador..."
+        />
+      </form>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Leaderboard Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="rounded-xl border border-gray-800 bg-gray-900/60">
+        <div class="border-b border-gray-800 p-3 text-sm font-medium">Jugadores</div>
+        <div class="max-h-[520px] overflow-auto p-2">
+          {leaderboard.length === 0 ? (
+            <div class="p-4 text-sm text-gray-400">Sin resultados</div>
+          ) : (
+            <ul class="divide-y divide-gray-800">
+              {leaderboard.map((p) => (
+                <li>
+                  <a
+                    href={`?player=${p.playerId}`}
+                    class:list={[
+                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-gray-800/60 block",
+                      { 'bg-gray-800/60': selectedPlayerId === p.playerId }
+                    ]}
+                  >
+                    <div>
+                      <div class="text-sm font-medium text-white">{p.playerNick || `ID ${p.playerId}`}</div>
+                      <div class="text-xs text-gray-400">Score {formatNumber(p.score)}</div>
+                    </div>
+                    <div class="text-xs text-gray-400">#{p.playerId}</div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Content -->
+    <div class="lg:col-span-2 space-y-6">
+      {error ? (
+        <div class="rounded-lg border border-red-800 bg-red-900/30 p-3 text-sm text-red-200">{error}</div>
+      ) : null}
+
+      {stats && (
+        <>
+          <!-- Main Metrics -->
+          <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Kills (jugadores)</div>
+              <div id="metric-kills" class="mt-1 text-2xl font-semibold text-white">{formatNumber(mainMetrics.kills)}</div>
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Kills (mobs)</div>
+              <div id="metric-mob-kills" class="mt-1 text-2xl font-semibold text-white">{formatNumber(mainMetrics.mobKills)}</div>
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Muertes</div>
+              <div id="metric-deaths" class="mt-1 text-2xl font-semibold text-white">{formatNumber(mainMetrics.deaths)}</div>
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Daño Hecho</div>
+              <div id="metric-damage-dealt" class="mt-1 text-2xl font-semibold text-white">{formatNumber(mainMetrics.dmgDealt)}</div>
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Daño Recibido</div>
+              <div id="metric-damage-taken" class="mt-1 text-2xl font-semibold text-white">{formatNumber(mainMetrics.dmgTaken)}</div>
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+              <div class="text-sm text-gray-400">Tiempo de juego</div>
+              <div id="metric-playtime" class="mt-1 text-2xl font-semibold text-white">{formatPlayTime(mainMetrics.playTime)}</div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <PlayerStatsCharts 
+            minedData={minedTop}
+            killedData={killedTop}
+            customData={customTop}
+            client:visible
+          />
+
+          <!-- Custom Stats Table -->
+          <div class="rounded-xl border border-gray-800 bg-gray-900/60">
+            <div class="border-b border-gray-800 p-3 text-sm font-medium">Detalles Custom</div>
+            <div class="max-h-80 overflow-auto">
+              <table id="custom-stats-table" class="min-w-full text-sm">
+                <thead class="sticky top-0 bg-gray-900/90">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-medium text-gray-300">Estadística</th>
+                    <th class="px-3 py-2 text-right font-medium text-gray-300">Valor</th>
+                    <th class="px-3 py-2 text-right font-medium text-gray-300">Posición</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800">
+                  {(stats?.custom ?? []).map((e) => (
+                    <tr>
+                      <td class="px-3 py-2 text-gray-200">{e.statName}</td>
+                      <td class="px-3 py-2 text-right text-gray-100">{formatNumber(e.amount)}</td>
+                      <td class="px-3 py-2 text-right text-gray-400">{e.position ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+</div>
+
+<script>
+  import type { PlayerStatistics, PlayerStatisticEntry } from '../lib/graphql';
+
+  // Helper functions (duplicated from server-side for client use)
+  function formatNumber(n?: number | null): string {
+    if (n == null) return '—';
+    return new Intl.NumberFormat('es-ES').format(n);
+  }
+
+  function formatPlayTime(ticks: number): string {
+    if (ticks === 0) return '0 segundos';
+    const totalSeconds = Math.floor(ticks / 20);
+    const days = Math.floor(totalSeconds / (24 * 60 * 60));
+    const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+    const remainingSeconds = totalSeconds % 60;
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (remainingSeconds > 0) parts.push(`${remainingSeconds}s`);
+    return parts.join(', ');
+  }
+
+  function titleCase(s: string): string {
+    return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  function pickTop(entries: PlayerStatisticEntry[] | null | undefined, n = 10) {
+    return (entries ?? []).slice().sort((a, b) => b.amount - a.amount).slice(0, n);
+  }
+
+  let isLoading = false;
+
+  // Client-side search and navigation functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const playerLinks = document.querySelectorAll('a[href*="?player="]');
+    
+    // Search functionality
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        
+        playerLinks.forEach((link) => {
+          const parent = link.closest('li');
+          if (!parent) return;
+          
+          const playerName = link.querySelector('.text-white')?.textContent?.toLowerCase() || '';
+          
+          if (!query || playerName.includes(query)) {
+            parent.style.display = '';
+          } else {
+            parent.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // SPA navigation for player selection
+    playerLinks.forEach((link) => {
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        if (isLoading) return;
+        
+        const href = (link as HTMLAnchorElement).getAttribute('href');
+        if (!href) return;
+        
+        const url = new URL(href, window.location.origin);
+        const playerId = url.searchParams.get('player');
+        
+        if (!playerId) return;
+        
+        await loadPlayerStats(Number(playerId));
+        
+        // Update URL without reload
+        window.history.pushState({ playerId }, '', href);
+        
+        // Update active state
+        playerLinks.forEach(l => l.classList.remove('bg-gray-800/60'));
+        link.classList.add('bg-gray-800/60');
+      });
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+      if (e.state?.playerId) {
+        loadPlayerStats(e.state.playerId);
+      }
+    });
+  });
+
+  async function loadPlayerStats(playerId: number) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    
+    try {
+      const response = await fetch(`/api/player-stats?playerId=${playerId}`);
+      const data = await response.json();
+      
+      if (!data.stats) {
+        console.error('No stats received');
+        return;
+      }
+      
+      updateStatsUI(data.stats);
+    } catch (err) {
+      console.error('Error loading player stats:', err);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  function updateStatsUI(stats: PlayerStatistics) {
+    // Update player header
+    const playerAvatar = document.querySelector('#player-avatar') as HTMLImageElement;
+    const playerName = document.querySelector('#player-name');
+    
+    if (playerAvatar && stats.uuidMapEntry?.playerNick) {
+      playerAvatar.src = `https://mc-heads.net/avatar/${stats.uuidMapEntry.playerNick}/100`;
+      playerAvatar.alt = stats.uuidMapEntry.playerNick;
+    }
+    
+    if (playerName) {
+      playerName.textContent = stats.uuidMapEntry?.playerNick 
+        ? `Estadísticas de ${stats.uuidMapEntry.playerNick}` 
+        : 'Estadísticas de Jugadores';
+    }
+
+    // Calculate metrics
+    const customMap = new Map<string, number>();
+    (stats?.custom || []).forEach((e) => customMap.set(e.statName, e.amount));
+
+    const mainMetrics = {
+      kills: customMap.get('player_kills') ?? 0,
+      mobKills: customMap.get('mob_kills') ?? 0,
+      deaths: customMap.get('deaths') ?? 0,
+      dmgDealt: customMap.get('damage_dealt') ?? 0,
+      dmgTaken: customMap.get('damage_taken') ?? 0,
+      playTime: customMap.get('play_time') ?? 0,
+    };
+
+    // Update metric cards
+    document.querySelector('#metric-kills')!.textContent = formatNumber(mainMetrics.kills);
+    document.querySelector('#metric-mob-kills')!.textContent = formatNumber(mainMetrics.mobKills);
+    document.querySelector('#metric-deaths')!.textContent = formatNumber(mainMetrics.deaths);
+    document.querySelector('#metric-damage-dealt')!.textContent = formatNumber(mainMetrics.dmgDealt);
+    document.querySelector('#metric-damage-taken')!.textContent = formatNumber(mainMetrics.dmgTaken);
+    document.querySelector('#metric-playtime')!.textContent = formatPlayTime(mainMetrics.playTime);
+
+    // Update charts data (trigger re-render by dispatching custom event)
+    const minedTop = pickTop(stats?.mined, 12).map((e) => ({ name: titleCase(e.statName), value: e.amount }));
+    const killedTop = pickTop(stats?.killed, 10).map((e) => ({ name: titleCase(e.statName), value: e.amount }));
+    const customTop = pickTop(stats?.custom, 12).map((e) => ({ name: e.statName, value: e.amount }));
+
+    window.dispatchEvent(new CustomEvent('updateCharts', { 
+      detail: { minedTop, killedTop, customTop } 
+    }));
+
+    // Update custom stats table
+    const tableBody = document.querySelector('#custom-stats-table tbody');
+    if (tableBody) {
+      tableBody.innerHTML = (stats?.custom ?? []).map((e) => `
+        <tr>
+          <td class="px-3 py-2 text-gray-200">${e.statName}</td>
+          <td class="px-3 py-2 text-right text-gray-100">${formatNumber(e.amount)}</td>
+          <td class="px-3 py-2 text-right text-gray-400">${e.position ?? '—'}</td>
+        </tr>
+      `).join('');
+    }
+  }
+</script>
+
