@@ -13,6 +13,7 @@ import {
 } from '../config';
 import  SpeedInsights  from "@vercel/speed-insights/astro"
 import CursorEffects from '../components/CursorEffects';
+import Squares from '../components/Squares.astro';
 import Analytics from '@vercel/analytics/astro'
 
 interface Props {
@@ -55,9 +56,11 @@ const faviconUrl = serverStatus?.favicon || '/favicon.svg';
     <title>{title}</title>
   </head>
   <body class="bg-gray-950 text-gray-100 min-h-screen">
+    <div class="fixed inset-0 z-0">
+      <Squares direction="right" speed={0.6} borderColor="rgba(148,163,184,0.15)" hoverFillColor="rgba(56,189,248,0.07)" squareSize={48} />
+    </div>
     <div>
       <CursorEffects
-        client:load
         enabled={true}
         hideSystemCursor={true}
         showCursorDot={false}
@@ -69,7 +72,7 @@ const faviconUrl = serverStatus?.favicon || '/favicon.svg';
       />
     </div>
     <!-- Background Pattern -->
-    <div class="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none"></div>
+    <div class="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none z-10"></div>
     
     <!-- Header -->
     <header id="site-header" class="relative z-50 border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 transition-transform duration-300">
@@ -194,6 +197,7 @@ const faviconUrl = serverStatus?.favicon || '/favicon.svg';
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
   
   :global(body) {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -201,6 +205,10 @@ const faviconUrl = serverStatus?.favicon || '/favicon.svg';
   
   :global(.font-minecraft) {
     font-family: 'Courier New', monospace;
+  }
+  
+  :global(.font-hero) {
+    font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
   }
 </style>
 

@@ -1,0 +1,175 @@
+---
+interface SquaresProps {
+  direction?: "diagonal" | "up" | "right" | "down" | "left";
+  speed?: number;
+  borderColor?: string;
+  squareSize?: number;
+  hoverFillColor?: string;
+}
+
+const {
+  direction = "right",
+  speed = 1,
+  borderColor = "#999",
+  squareSize = 40,
+  hoverFillColor = "#222",
+} = Astro.props;
+---
+
+<canvas class="squares-canvas"></canvas>
+
+<script
+  define:vars={{
+    direction,
+    speed,
+    borderColor,
+    squareSize,
+    hoverFillColor,
+  }}
+>
+  const canvas = document.querySelector(".squares-canvas");
+  if (!canvas) throw new Error("Canvas element not found");
+  const ctx = canvas.getContext("2d");
+
+  let requestRef = null;
+  let numSquaresX = 0;
+  let numSquaresY = 0;
+  let gridOffset = { x: 0, y: 0 };
+  let hoveredSquareRef = null;
+
+  const resizeCanvas = () => {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    numSquaresX = Math.ceil(canvas.width / squareSize) + 1;
+    numSquaresY = Math.ceil(canvas.height / squareSize) + 1;
+  };
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  const drawGrid = () => {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const gradient = ctx.createRadialGradient(
+      canvas.width / 2,
+      canvas.height / 2,
+      0,
+      canvas.width / 2,
+      canvas.height / 2,
+      Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2,
+    );
+    gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+    gradient.addColorStop(1, "#060010");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const startX = Math.floor(gridOffset.x / squareSize) * squareSize;
+    const startY = Math.floor(gridOffset.y / squareSize) * squareSize;
+
+    for (let x = startX; x < canvas.width + squareSize; x += squareSize) {
+      for (let y = startY; y < canvas.height + squareSize; y += squareSize) {
+        const squareX = x - (gridOffset.x % squareSize);
+        const squareY = y - (gridOffset.y % squareSize);
+
+        if (
+          hoveredSquareRef &&
+          Math.floor((x - startX) / squareSize) === hoveredSquareRef.x &&
+          Math.floor((y - startY) / squareSize) === hoveredSquareRef.y
+        ) {
+          ctx.fillStyle = hoverFillColor;
+          ctx.fillRect(squareX, squareY, squareSize, squareSize);
+        }
+
+        ctx.strokeStyle = borderColor;
+        ctx.strokeRect(squareX, squareY, squareSize, squareSize);
+      }
+    }
+  };
+
+  const updateAnimation = () => {
+    const effectiveSpeed = Math.max(speed, 0.1);
+    switch (direction) {
+      case "right":
+        gridOffset.x =
+          (gridOffset.x - effectiveSpeed + squareSize) % squareSize;
+        break;
+      case "left":
+        gridOffset.x =
+          (gridOffset.x + effectiveSpeed + squareSize) % squareSize;
+        break;
+      case "up":
+        gridOffset.y =
+          (gridOffset.y + effectiveSpeed + squareSize) % squareSize;
+        break;
+      case "down":
+        gridOffset.y =
+          (gridOffset.y - effectiveSpeed + squareSize) % squareSize;
+        break;
+      case "diagonal":
+        gridOffset.x =
+          (gridOffset.x - effectiveSpeed + squareSize) % squareSize;
+        gridOffset.y =
+          (gridOffset.y - effectiveSpeed + squareSize) % squareSize;
+        break;
+      default:
+        break;
+    }
+
+    drawGrid();
+    requestRef = requestAnimationFrame(updateAnimation);
+  };
+
+  const handleMouseMove = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const startX = Math.floor(gridOffset.x / squareSize) * squareSize;
+    const startY = Math.floor(gridOffset.y / squareSize) * squareSize;
+
+    const hoveredSquareX = Math.floor(
+      (mouseX + gridOffset.x - startX) / squareSize,
+    );
+    const hoveredSquareY = Math.floor(
+      (mouseY + gridOffset.y - startY) / squareSize,
+    );
+
+    if (
+      !hoveredSquareRef ||
+      hoveredSquareRef.x !== hoveredSquareX ||
+      hoveredSquareRef.y !== hoveredSquareY
+    ) {
+      hoveredSquareRef = { x: hoveredSquareX, y: hoveredSquareY };
+    }
+  };
+
+  const handleMouseLeave = () => {
+    hoveredSquareRef = null;
+  };
+
+  canvas.addEventListener("mousemove", handleMouseMove);
+  canvas.addEventListener("mouseleave", handleMouseLeave);
+  requestRef = requestAnimationFrame(updateAnimation);
+
+  document.addEventListener(
+    "astro:before-swap",
+    () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (requestRef) cancelAnimationFrame(requestRef);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+    },
+    { once: true },
+  );
+</script>
+
+<style>
+  .squares-canvas {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+</style>
