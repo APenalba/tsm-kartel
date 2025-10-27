@@ -221,10 +221,10 @@ export default function PlayerStats() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 min-w-0">
               <div className="mb-3 text-sm font-medium">Top Bloques Minados</div>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+              <div>
+                <ResponsiveContainer width="100%" height={288}>
                   <BarChart data={minedTop}>
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
                     <YAxis tick={{ fontSize: 12 }} />
@@ -235,10 +235,10 @@ export default function PlayerStats() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 min-w-0">
               <div className="mb-3 text-sm font-medium">Top Mobs Eliminados</div>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+              <div>
+                <ResponsiveContainer width="100%" height={288}>
                   <PieChart>
                     <Pie data={killedTop} dataKey="value" nameKey="name" outerRadius={90} innerRadius={40}>
                       {killedTop.map((_, i) => (
@@ -253,10 +253,10 @@ export default function PlayerStats() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 min-w-0">
             <div className="mb-3 text-sm font-medium">Custom Stats (Top)</div>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
+            <div>
+              <ResponsiveContainer width="100%" height={288}>
                 <BarChart data={customTop.map((e) => ({ name: e.name, value: e.value }))}>
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
                   <YAxis tick={{ fontSize: 12 }} />
