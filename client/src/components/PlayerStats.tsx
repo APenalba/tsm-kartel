@@ -176,14 +176,20 @@ export default function PlayerStats() {
     <div className="relative">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {meta?.serverIcon ? (
+          {selectedPlayerId && stats ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={`data:image/png;base64,${meta.serverIcon}`} alt="Server Icon" className="h-10 w-10 rounded" />
+            <img 
+              src={`https://mc-heads.net/avatar/${stats.uuidMapEntry?.playerNick || 'MHF_Steve'}/100`} 
+              alt={stats.uuidMapEntry?.playerNick || 'Unknown Player'} 
+              className="h-10 w-10 rounded" 
+            />
           ) : (
             <div className="h-10 w-10 rounded bg-gradient-to-br from-emerald-500 to-cyan-600" />
           )}
           <div>
-            <div className="text-lg font-semibold">Estadísticas de Jugadores</div>
+            <div className="text-lg font-semibold">
+              {stats?.uuidMapEntry?.playerNick ? `Estadísticas de ${stats.uuidMapEntry.playerNick}` : 'Estadísticas de Jugadores'}
+            </div>
             <div className="text-xs text-gray-400">Ranking Hall of Fame · {leaderboard.length} jugadores</div>
           </div>
         </div>
