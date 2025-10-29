@@ -2,7 +2,7 @@
 import { publicEnv } from './lib/env';
 
 export const DISCORD_INVITE_URL = publicEnv.DISCORD_INVITE || "https://discord.gg/tu-invite";
-export const GITHUB_URL = "https://github.com/alvaropenalba/TSM-Kartel-N-Company";
+export const GITHUB_URL = "https://github.com/APenalba/tsm-kartel";
 
 // API GraphQL
 export const API_URL = publicEnv.GRAPHQL_API_URL || 'http://localhost:8000/graphql';
