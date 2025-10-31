@@ -1,23 +1,76 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import PlayerStatsView from '../components/PlayerStatsView.astro';
+import PlayerStatisticsDashboard from "../components/PlayerStatisticsDashboard";
+import Layout from "../layouts/Layout.astro";
+import {
+  getHallOfFameLeaderboard,
+  getPlayerStatistics,
+  getPlayerStatisticsSummary,
+  getSyncMetadata,
+  type PlayerScoreEntry,
+  type PlayerStatistics,
+  type PlayerStatisticsSummary,
+  type SyncMetadata,
+} from "../lib/graphql";
 
-const title = 'Estadísticas de Jugadores';
+const title = "Estadísticas de Jugadores";
+
+let leaderboard: PlayerScoreEntry[] = [];
+let summary: PlayerStatisticsSummary | null = null;
+let syncMetadata: SyncMetadata | null = null;
+let initialPlayerStats: PlayerStatistics | null = null;
+
+try {
+  leaderboard = await getHallOfFameLeaderboard(75, true);
+} catch (error) {
+  console.error("No se pudo obtener el leaderboard:", error);
+}
+
+try {
+  summary = await getPlayerStatisticsSummary();
+} catch (error) {
+  console.error("No se pudo obtener el resumen de estadísticas:", error);
+}
+
+try {
+  syncMetadata = await getSyncMetadata();
+} catch (error) {
+  console.error("No se pudo obtener la metadata de sincronización:", error);
+}
+
+const initialPlayerId =
+  leaderboard.find((entry) => !entry.isBot)?.playerId ??
+  leaderboard[0]?.playerId;
+
+if (initialPlayerId) {
+  try {
+    initialPlayerStats = await getPlayerStatistics(initialPlayerId);
+  } catch (error) {
+    console.error(
+      `No se pudieron obtener las estadísticas del jugador ${initialPlayerId}:`,
+      error,
+    );
+  }
+}
+
+// Serializar datos para pasarlos al cliente
+const serializedLeaderboard = JSON.parse(JSON.stringify(leaderboard));
+const serializedSummary = summary ? JSON.parse(JSON.stringify(summary)) : null;
+const serializedSyncMetadata = syncMetadata
+  ? JSON.parse(JSON.stringify(syncMetadata))
+  : null;
+const serializedInitialStats = initialPlayerStats
+  ? JSON.parse(JSON.stringify(initialPlayerStats))
+  : null;
 ---
 
 <Layout title={title}>
-  <section class="space-y-6">
-    <div class="flex items-end justify-between">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight">{title}</h2>
-        <p class="mt-1 text-sm text-gray-400">Explora kills, muertes, bloques minados y más.</p>
-      </div>
-    </div>
-
-    <div class="rounded-2xl border border-gray-800 bg-gray-900/40 p-4">
-      <PlayerStatsView />
-    </div>
+  <section class="space-y-10">
+    <PlayerStatisticsDashboard
+      client:load
+      initialLeaderboard={serializedLeaderboard}
+      initialSummary={serializedSummary}
+      initialPlayerStats={serializedInitialStats}
+      syncMetadata={serializedSyncMetadata}
+    />
   </section>
 </Layout>
-
-
