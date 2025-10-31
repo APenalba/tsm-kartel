@@ -96,6 +96,24 @@ export const GET_PLAYER_STATISTICS = gql`
     }
   }
 `;
+export const GET_PLAYER_STATISTICS_SUMMARY = gql`
+  query GetPlayerStatisticsSummary {
+    playerStatisticsSummary {
+      playerCount
+      playTimeTicks
+      playTimeSeconds
+      travelDistanceCm
+      travelDistanceKm
+      damageDealt
+      brokenTools
+      craftedItems
+      minedBlocks
+      killedMobs
+      droppedItems
+      pickedUpItems
+    }
+  }
+`;
 
 export const GET_SYNC_METADATA = gql`
   query GetSyncMetadata {
@@ -158,6 +176,20 @@ export interface PlayerStatistics {
   pickedUp?: PlayerStatisticEntry[] | null;
   used?: PlayerStatisticEntry[] | null;
   hallOfFameEntry?: HallOfFameEntry | null;
+}
+export interface PlayerStatisticsSummary {
+  playerCount: number;
+  playTimeTicks: number;
+  playTimeSeconds: number;
+  travelDistanceCm: number;
+  travelDistanceKm: number;
+  damageDealt: number;
+  brokenTools: number;
+  craftedItems: number;
+  minedBlocks: number;
+  killedMobs: number;
+  droppedItems: number;
+  pickedUpItems: number;
 }
 
 export interface SyncMetadata {
@@ -229,6 +261,12 @@ export async function getPlayerStatistics(playerId: number): Promise<PlayerStati
     { playerId }
   );
   return data.playerStatistics;
+}
+export async function getPlayerStatisticsSummary(): Promise<PlayerStatisticsSummary | null> {
+  const data = await graphqlClient.request<{ playerStatisticsSummary: PlayerStatisticsSummary | null }>(
+    GET_PLAYER_STATISTICS_SUMMARY
+  );
+  return data.playerStatisticsSummary ?? null;
 }
 
 export async function getSyncMetadata(): Promise<SyncMetadata | null> {

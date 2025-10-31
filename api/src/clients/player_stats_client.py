@@ -190,3 +190,109 @@ class PlayerStatsClient:
                 del result["player_uuid"]
 
         return results
+
+    async def _fetch_int(self, query: str, params: tuple = ()) -> int:
+        """Execute a query that returns a single integer value."""
+
+        result = await self._execute_query(query, params)
+        if not result:
+            return 0
+
+        row = result[0]
+        # Prefer aliased "total" column, but gracefully fallback to first value
+        value = row.get("total")
+        if value is None and row:
+            value = next(iter(row.values()), 0)
+
+        return int(value or 0)
+
+    async def get_player_statistics_summary(self) -> Dict[str, Any]:
+        """Aggregate core statistics across all players."""
+
+        player_count = await self._fetch_int(
+            "SELECT COUNT(*) AS total FROM uuid_map"
+        )
+
+        play_time_ticks = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM custom WHERE stat_name = ?",
+            ("play_time",)
+        )
+
+        damage_dealt = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM custom WHERE stat_name = ?",
+            ("damage_dealt",)
+        )
+
+        movement_stats = (
+            "walk_one_cm",
+            "sprint_one_cm",
+            "fly_one_cm",
+            "aviate_one_cm",
+            "boat_one_cm",
+            "swim_one_cm",
+            "minecart_one_cm",
+            "horse_one_cm",
+            "pig_one_cm",
+            "strider_one_cm",
+            "crawl_one_cm",
+            "walk_under_water_one_cm",
+            "walk_on_water_one_cm",
+            "climb_one_cm",
+            "fall_one_cm",
+            "happy_ghast_one_cm",
+            "crouch_one_cm",
+        )
+
+        travel_distance_cm = 0
+        if movement_stats:
+            placeholders = ", ".join(["?" for _ in movement_stats])
+            travel_distance_cm = await self._fetch_int(
+                f"SELECT SUM(amount) AS total FROM custom WHERE stat_name IN ({placeholders})",
+                tuple(movement_stats)
+            )
+
+        broken_tools = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM broken"
+        )
+
+        crafted_items = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM crafted"
+        )
+
+        mined_blocks = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM mined"
+        )
+
+        killed_mobs = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM killed"
+        )
+
+        dropped_items = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM dropped"
+        )
+
+        picked_up_items = await self._fetch_int(
+            "SELECT SUM(amount) AS total FROM picked_up"
+        )
+
+        play_time_seconds = play_time_ticks / 20 if play_time_ticks else 0.0
+        travel_distance_km = (
+            travel_distance_cm / 100000
+            if travel_distance_cm
+            else 0.0
+        )
+
+        return {
+            "player_count": player_count,
+            "play_time_ticks": play_time_ticks,
+            "play_time_seconds": float(play_time_seconds),
+            "travel_distance_cm": travel_distance_cm,
+            "travel_distance_km": float(travel_distance_km),
+            "damage_dealt": damage_dealt,
+            "broken_tools": broken_tools,
+            "crafted_items": crafted_items,
+            "mined_blocks": mined_blocks,
+            "killed_mobs": killed_mobs,
+            "dropped_items": dropped_items,
+            "picked_up_items": picked_up_items,
+        }

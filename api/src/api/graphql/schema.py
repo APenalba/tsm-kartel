@@ -80,6 +80,24 @@ class PlayerStatistics:
 
 
 @strawberry.type
+class PlayerStatisticsSummary:
+    """Aggregated statistics across all players"""
+
+    player_count: int
+    play_time_ticks: int
+    play_time_seconds: float
+    travel_distance_cm: int
+    travel_distance_km: float
+    damage_dealt: int
+    broken_tools: int
+    crafted_items: int
+    mined_blocks: int
+    killed_mobs: int
+    dropped_items: int
+    picked_up_items: int
+
+
+@strawberry.type
 class PlayerScoreEntry:
     """Entry for the leaderboard of the Hall of Fame."""
     player_id: int
@@ -403,6 +421,18 @@ class Query:
             return SyncMetadata(**metadata_data) if metadata_data else None
         except Exception as e:
             logger.error("sync_metadata error err=%s", e)
+            return None
+
+    @strawberry.field
+    async def player_statistics_summary(self) -> Optional[PlayerStatisticsSummary]:
+        """Get aggregated statistics for all players."""
+
+        try:
+            stats_client = PlayerStatsClient(settings.player_stats_db_path)
+            summary_data = await stats_client.get_player_statistics_summary()
+            return PlayerStatisticsSummary(**summary_data)
+        except Exception as e:  # noqa: BLE001
+            logger.error("player_statistics_summary error err=%s", e)
             return None
 
     @strawberry.field
